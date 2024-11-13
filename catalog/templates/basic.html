@@ -1,0 +1,47 @@
+{% load bootstrap4 %}
+{% load static %}
+
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    {% bootstrap_css %}
+    {% bootstrap_javascript jquery='slim' %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <title>{% block title %}Главная{% endblock %}</title>
+</head>
+<body>
+
+    <header class="bg-primary text-white p-3">  <!-- Шапка с цветом фона -->
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 class="h5">Design.pro</h1>  <!-- Название сайта -->
+            <div class="d-flex">
+                {% if user.is_authenticated %}
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Профиль</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#"></a>
+                            <a class="dropdown-item" href="#"></a>
+                            <a class="dropdown-item" href="#"></a>
+                            <div class="dropdown-divider"></div>
+                            <form method="post" action="{% url 'logout' %}">  <!-- Specify the logout URL -->
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item">Выйти</button>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="p-2 text-dark"><a href="{% url 'register' %}" class="text-white">Регистрация</a></p>
+                    <p class="p-2 text-dark"><a href="{% url 'login' %}" class="text-white">Вход</a></p> <!-- Link to login page -->
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    {% block content %}
+    <!-- Основной контент будет вставлен сюда -->
+    {% endblock %}
+
+</body>
+</html>

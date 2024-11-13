@@ -1,0 +1,73 @@
+{% extends "basic.html" %}
+{% load bootstrap4 %}
+{% load static %}
+
+{% block content %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+
+                <!-- Display success messages if any -->
+                {% if messages %}
+                    <div class="container mt-3">
+                        {% for message in messages %}
+                            <div class="alert alert-success" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Display error messages if any -->
+                {% if form.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <fieldset class="form-group">
+                        <legend class="border-bottom mb-4">Вход в личный кабинет</legend>
+
+                        <div class="form-group">
+                            {{ form.username.label }}  <!-- Label for username -->
+                            {{ form.username }}  <!-- Form field for username -->
+                            {% if form.username.errors %}
+                                <div class="text-danger">
+                                    {{ form.username.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.password.label }}  <!-- Label for password -->
+                            {{ form.password }}  <!-- Form field for password -->
+                            {% if form.password.errors %}
+                                <div class="text-danger">
+                                    {{ form.password.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </fieldset>
+                    <div class="form-group">
+                        <button class="btn btn-outline-info" type="submit">Войти</button>
+                    </div>
+                </form>
+
+                <div class="border-top pt-3">
+                    <small class="text-muted">
+                        Нет аккаунта? <a href="{% url 'register' %}" class="ml-2">Регистрация</a> <!-- Link to registration page -->
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
