@@ -7,18 +7,7 @@
         <div class="row justify-content-center">
             <div class="col-md-6">
 
-                <!-- Display success messages if any -->
-                {% if messages %}
-                    <div class="container mt-3">
-                        {% for message in messages %}
-                            <div class="alert alert-success" role="alert">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                <!-- Display error messages if any -->
+                <!-- Отображение сообщений об ошибках -->
                 {% if form.errors %}
                     <div class="alert alert-danger" role="alert">
                         {% for field in form %}
@@ -32,8 +21,9 @@
                     </div>
                 {% endif %}
 
-                <form method="POST">
+                <form method="post" action="{% url 'login' %}">
                     {% csrf_token %}
+                    <input type="hidden" name="next" value="{% url 'index' %}">  <!-- Укажите URL для перенаправления -->
                     <fieldset class="form-group">
                         <legend class="border-bottom mb-4">Вход в личный кабинет</legend>
 
@@ -58,13 +48,13 @@
                         </div>
                     </fieldset>
                     <div class="form-group">
-                        <button class="btn btn-outline-info" type="submit">Войти</button>
+                        <button class="btn btn-primary btn-block" type="submit">Войти</button>  <!-- Кнопка с полным размером -->
                     </div>
                 </form>
 
-                <div class="border-top pt-3">
+                <div class="border-top pt-3 text-center">
                     <small class="text-muted">
-                        Нет аккаунта? <a href="{% url 'register' %}" class="ml-2">Регистрация</a> <!-- Link to registration page -->
+                        Нет аккаунта? <a href="{% url 'register' %}" class="ml-2">Регистрация</a> <!-- Ссылка на страницу регистрации -->
                     </small>
                 </div>
             </div>

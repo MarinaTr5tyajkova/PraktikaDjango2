@@ -3,11 +3,8 @@
 {% load static %}
 
 {% block content %}
-<div>
-    {% if user.is_authenticated %}
-        <p>Добро пожаловать, {{ user.username }}!</p>
-        <!-- Здесь можно добавить дополнительные элементы для авторизованного пользователя -->
-    {% else %}
-    {% endif %}
-</div>
-{% endblock %}
+    <div class="container mt-5">
+        <h1>Добро пожаловать на главную страницу!</h1>
+        <!-- Остальной контент вашей главной страницы -->
+    </div>
+{% endblock content %}

@@ -7,18 +7,6 @@
         <div class="row justify-content-center">  <!-- Center the form -->
             <div class="col-md-6">  <!-- Set the width of the form -->
                 <div class="content-section">
-
-                    <!-- Display success or error messages -->
-                    {% if messages %}
-                        <div class="container mt-3">
-                            {% for message in messages %}
-                                <div class="alert alert-success" role="alert">
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-
                     <form method="POST">
                         {% csrf_token %}
                         <fieldset class="form-group">

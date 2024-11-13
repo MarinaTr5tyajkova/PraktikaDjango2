@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 import re
 from django.contrib.auth.forms import AuthenticationForm
-
+from .models import DesignRequest
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField(
@@ -87,25 +87,47 @@ class UserRegisterForm(UserCreationForm):
 
 class CustomLoginForm(AuthenticationForm):
     username = forms.CharField(
+        label='Логин',
         widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Логин'
+            'class': 'form-control',  # Класс Bootstrap для стилизации
+            'placeholder': 'Введите логин или email'  # Подсказка для пользователя
         })
     )
     password = forms.CharField(
+        label='Пароль',
         widget=forms.PasswordInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Пароль'
+            'class': 'form-control',  # Класс Bootstrap для стилизации
+            'placeholder': 'Введите пароль'  # Подсказка для пользователя
         })
     )
 
 class LoginForm(forms.Form):
     username = forms.CharField(
-        label='Имя пользователя',
-        widget=forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'})  # Добавление класса и отключение автозаполнения
+        label='Логин',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',  # Класс Bootstrap для стилизации
+            'placeholder': 'Введите логин или email'  # Подсказка для пользователя
+        })
     )
     password = forms.CharField(
         label='Пароль',
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'autocomplete': 'off'})  # Добавление класса и отключение автозаполнения
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',  # Класс Bootstrap для стилизации
+            'placeholder': 'Введите пароль'  # Подсказка для пользователя
+        })
     )
 
+
+class DesignRequestForm(forms.ModelForm):
+    class Meta:
+        model = DesignRequest
+        fields = ['title', 'description', 'category', 'image']
+
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+        if image:
+            # Check file size (max 2MB)
+            if image.size > 2 * 1024 * 1024:
+                raise forms.ValidationError("The maximum file size is 2MB.")
+            return image
+        raise forms.ValidationError("This field is required.")

@@ -39,9 +39,33 @@
         </div>
     </header>
 
+    {% bootstrap_messages %}
     {% block content %}
-    <!-- Основной контент будет вставлен сюда -->
-    {% endblock %}
+    <div class="container mt-4">
+        <h2 class="mb-4">Последние выполненные заявки</h2>
 
+        {% if completed_requests %}
+            <div class="list-group">
+                {% for request in completed_requests %}
+                    <div class="list-group-item">
+                        <h5 class="mb-1">{{ request.title }}</h5>
+                        <p class="mb-1"><strong>Категория:</strong> {{ request.category }}</p>
+                        <p class="mb-1"><strong>Дата выполнения:</strong> {{ request.timestamp|date:"d.m.Y H:i" }}</p>
+                        {% if request.photo %}
+                            <img src="{{ request.photo.url }}" alt="{{ request.title }}" class="img-thumbnail" style="max-width: 100px;">
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Нет выполненных заявок для отображения.</p>
+        {% endif %}
+
+        <hr>
+
+        <h2 class="mt-4">Количество заявок в статусе «Принято в работу»</h2>
+        <p class="lead">{{ accepted_requests_count }}</p>
+    </div>
+    {% endblock %}
 </body>
 </html>
