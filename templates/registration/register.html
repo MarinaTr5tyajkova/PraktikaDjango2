@@ -3,9 +3,9 @@
 {% load static %}
 
 {% block content %}
-    <div class="container mt-5">  <!-- Add a Bootstrap container with margin-top -->
-        <div class="row justify-content-center">  <!-- Center the form -->
-            <div class="col-md-6">  <!-- Set the width of the form -->
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
                 <div class="content-section">
                     <form method="POST">
                         {% csrf_token %}
@@ -13,66 +13,63 @@
                             <legend class="border-bottom mb-4">Добро пожаловать</legend>
 
                             <!-- Display form fields -->
-
                             <div class="form-group">
-                                {{ form.full_name.label }}  <!-- Label for full name -->
-                                {{ form.full_name }}  <!-- Form field for full name with Bootstrap class already added in forms.py -->
+                                {{ form.full_name.label }}
+                                {{ form.full_name }}
                                 {% if form.full_name.errors %}
-                                    <div class="text-danger">
-                                        {{ form.full_name.errors }}
-                                    </div>
+                                    <div class="text-danger">{{ form.full_name.errors }}</div>
                                 {% endif %}
                             </div>
 
                             <div class="form-group">
-                                {{ form.username.label }}  <!-- Label for username -->
-                                {{ form.username }}  <!-- Form field for username with Bootstrap class already added in forms.py -->
+                                {{ form.username.label }}
+                                {{ form.username }}
                                 {% if form.username.errors %}
-                                    <div class="text-danger">
-                                        {{ form.username.errors }}
-                                    </div>
+                                    <div class="text-danger">{{ form.username.errors }}</div>
                                 {% endif %}
                             </div>
 
                             <div class="form-group">
-                                {{ form.email.label }}  <!-- Label for email -->
-                                {{ form.email }}  <!-- Form field for email with Bootstrap class already added in forms.py -->
+                                {{ form.email.label }}
+                                {{ form.email }}
                                 {% if form.email.errors %}
-                                    <div class="text-danger">
-                                        {{ form.email.errors }}
-                                    </div>
+                                    <div class="text-danger">{{ form.email.errors }}</div>
                                 {% endif %}
                             </div>
 
                             <div class="form-group">
-                                {{ form.password1.label }}  <!-- Label for password -->
-                                {{ form.password1 }}  <!-- Form field for password with Bootstrap class already added in forms.py -->
+                                {{ form.password1.label }}
+                                {{ form.password1 }}
                                 {% if form.password1.errors %}
-                                    <div class="text-danger">
-                                        {{ form.password1.errors }}
-                                    </div>
+                                    <div class="text-danger">{{ form.password1.errors }}</div>
                                 {% endif %}
                             </div>
 
                             <div class="form-group">
-                                {{ form.password2.label }}  <!-- Label for password confirmation -->
-                                {{ form.password2 }}  <!-- Form field for password confirmation with Bootstrap class already added in forms.py -->
+                                {{ form.password2.label }}
+                                {{ form.password2 }}
                                 {% if form.password2.errors %}
-                                    <div class="text-danger">
-                                        {{ form.password2.errors }}
-                                    </div>
+                                    <div class="text-danger">{{ form.password2.errors }}</div>
                                 {% endif %}
                             </div>
 
                             <div class="form-group">
-                                {{ form.consent.label }}  <!-- Label for consent -->
-                                {{ form.consent }}  <!-- Checkbox for consent without Bootstrap class -->
+                                {{ form.consent.label }}
+                                {{ form.consent }}
                                 {% if form.consent.errors %}
-                                    <div class="text-danger">
-                                        {{ form.consent.errors }}
-                                    </div>
+                                    <div class="text-danger">{{ form.consent.errors }}</div>
                                 {% endif %}
                             </div>
+
+                            {% if captcha_form %}
+                                <div>
+                                    <label for="{{ captcha_form.captcha_answer.id_for_label }}">{{ captcha_form.captcha_answer.label }}</label>
+                                    {{ captcha_form.captcha_answer }}
+                                    {% if captcha_form.captcha_answer.errors %}
+                                        <div class="text-danger">{{ captcha_form.captcha_answer.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
 
                         </fieldset>
                         <div class="form-group">
@@ -81,7 +78,7 @@
                     </form>
                     <div class="border-top pt-3">
                         <small class="text-muted">
-                            Уже есть аккаунт? <a href="{% url 'login' %}" class="ml-2">Вход</a> <!-- Link to login page -->
+                            Уже есть аккаунт? <a href="{% url 'login' %}" class="ml-2">Вход</a>
                         </small>
                     </div>
                 </div>

@@ -128,3 +128,12 @@ class ApplicationForm(forms.ModelForm):
         if photo.size > 2 * 1024 * 1024:  # Проверка на максимальный размер 2 Мб
             raise forms.ValidationError("Размер файла не должен превышать 2 Мб.")
         return photo
+
+class CaptchaForm(forms.Form):
+    captcha_answer = forms.IntegerField(label='2 + 2 * 2 = ')
+
+    def clean_captcha_answer(self):
+        answer = self.cleaned_data.get('captcha_answer')
+        if answer != 6:  # Проверка правильного ответа
+            raise ValidationError("Неправильный ответ на капчу. Попробуйте снова.")
+        return answer

@@ -48,31 +48,3 @@
     {% endif %}
 {% endblock %}
 
-<style>
-    details {
-        cursor: pointer;
-        /* Убираем стандартные стрелочки браузера */
-        list-style-type: none;
-    }
-
-    summary {
-        padding: 0;
-        margin: 0;
-    }
-
-    /* Убираем стандартные стрелочки браузера */
-    details summary::-webkit-details-marker {
-        display: none; /* Для WebKit браузеров (Chrome, Safari) */
-    }
-
-    details summary::-moz-details-marker {
-        display: none; /* Для Firefox */
-    }
-
-    /* Стили для текста описания */
-    details p {
-        margin-top: 10px;
-        margin-bottom: 0;
-        overflow-wrap: break-word; /* Перенос длинных слов */
-    }
-</style>
