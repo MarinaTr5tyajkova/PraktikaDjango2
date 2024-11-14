@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -19,6 +20,7 @@ class Application(models.Model):
     photo = models.ImageField(upload_to='photos/', max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='new')
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, null=True)  # Add this line
 
     def __str__(self):
         return self.title

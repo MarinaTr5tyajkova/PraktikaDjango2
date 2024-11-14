@@ -24,3 +24,12 @@ details p {
     margin-bottom: 0;
     overflow-wrap: break-word; /* Перенос длинных слов */
 }
+
+#add-project-btn {
+    background-color: #4CAF50; /* Зеленый */
+    color: white;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}

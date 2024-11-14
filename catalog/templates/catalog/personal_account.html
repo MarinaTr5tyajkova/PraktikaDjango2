@@ -1,0 +1,32 @@
+{% extends "basic.html" %}
+
+{% block content %}
+
+<h3>Личный кабинет</h3>
+{% if designapplication_list %}
+    <p class="h5 mt-4">Ваши заявки</p>
+    <hr>
+    <div class="app-display p-2">
+        {% for app in designapplication_list %}
+            <div class="app-display-card">
+                <h5 class="mb-1">{{ app.title }}</h5>
+                <p class="mb-1"><strong>Категория:</strong> {{ app.category }}</p>
+                <p class="mb-1"><strong>Дата выполнения:</strong> {{ app.created_at|date:"d.m.Y H:i" }}</p>
+                {% if app.photo %}
+                    <img src="{{ app.photo.url }}" alt="{{ app.title }}" class="img-thumbnail" style="max-width: 100px;">
+                {% endif %}
+                {% if app.status == 'new' %}
+                    <a href="{% url 'app_delete' app.id %}" class="button delete-button pt-2 pb-2">Удалить</a>
+                {% else %}
+                    <p class="button delete-button-inactive pt-2 pb-2 mb-0">В работе</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>У вас нет заявок.</p>
+{% endif %}
+
+<p>Debug: {{ designapplication_list|length }} заявок найдено.</p>  <!-- Debugging output -->
+
+{% endblock %}

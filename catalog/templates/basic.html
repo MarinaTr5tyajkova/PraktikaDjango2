@@ -13,59 +13,83 @@
 </head>
 <body>
 
-    <header class="bg-primary text-white p-3">  <!-- Шапка с цветом фона -->
-        <div class="container d-flex justify-content-between align-items-center">
-            <h1 class="h5">Design.pro</h1>  <!-- Название сайта -->
-            <div class="d-flex">
-                {% if user.is_authenticated %}
-                    <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-white" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Профиль</a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#"></a>
-                            <a class="dropdown-item" href="#"></a>
-                            <a class="dropdown-item" href="#"></a>
-                            <div class="dropdown-divider"></div>
-                            <form method="post" action="{% url 'logout' %}">  <!-- Specify the logout URL -->
-                                {% csrf_token %}
-                                <button type="submit" class="dropdown-item">Выйти</button>
-                            </form>
-                        </div>
+<header class="bg-primary text-white p-3">
+    <div class="container d-flex justify-content-between align-items-center">
+        <h1 class="h5">Design.pro</h1>
+        <div class="d-flex">
+            {% if user.is_authenticated %}
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Профиль</a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="{% url 'create_application' %}">Создать заявку</a>
+                        <div class="dropdown-divider"></div>
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="dropdown-item">Выйти</button>
+                        </form>
+                        <a class="dropdown-item" href="{% url 'personal_account' %}">Личный кабинет</a>
                     </div>
-                {% else %}
-                    <p class="p-2 text-dark"><a href="{% url 'register' %}" class="text-white">Регистрация</a></p>
-                    <p class="p-2 text-dark"><a href="{% url 'login' %}" class="text-white">Вход</a></p> <!-- Link to login page -->
-                {% endif %}
-            </div>
+                </div>
+            {% else %}
+                <p class="p-2 text-dark"><a href="{% url 'register' %}" class="text-white">Регистрация</a></p>
+                <p class="p-2 text-dark"><a href="{% url 'login' %}" class="text-white">Вход</a></p>
+            {% endif %}
         </div>
-    </header>
-
-    {% bootstrap_messages %}
-    {% block content %}
-    <div class="container mt-4">
-        <h2 class="mb-4">Последние выполненные заявки</h2>
-
-        {% if completed_requests %}
-            <div class="list-group">
-                {% for request in completed_requests %}
-                    <div class="list-group-item">
-                        <h5 class="mb-1">{{ request.title }}</h5>
-                        <p class="mb-1"><strong>Категория:</strong> {{ request.category }}</p>
-                        <p class="mb-1"><strong>Дата выполнения:</strong> {{ request.timestamp|date:"d.m.Y H:i" }}</p>
-                        {% if request.photo %}
-                            <img src="{{ request.photo.url }}" alt="{{ request.title }}" class="img-thumbnail" style="max-width: 100px;">
-                        {% endif %}
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p>Нет выполненных заявок для отображения.</p>
-        {% endif %}
-
-        <hr>
-
-        <h2 class="mt-4">Количество заявок в статусе «Принято в работу»</h2>
-        <p class="lead">{{ accepted_requests_count }}</p>
     </div>
-    {% endblock %}
+</header>
+
+{% bootstrap_messages %}
+{% block content %}
+
+<div class="container mt-4">
+    {% if user.is_authenticated %}
+        <a href="{% url 'create_application' %}" class="btn btn-success mb-3">Добавить заявку</a>
+    {% endif %}
+
+    <h2 class="mb-4">Последние выполненные заявки</h2>
+
+    {% if completed_requests %}
+        <div class="list-group">
+            {% for request in completed_requests %}
+                <div class="list-group-item">
+                    <h5 class="mb-1">{{ request.title }}</h5>
+                    <p class="mb-1"><strong>Категория:</strong> {{ request.category }}</p>
+                    <p class="mb-1"><strong>Дата выполнения:</strong> {{ request.timestamp|date:"d.m.Y H:i" }}</p>
+                    {% if request.photo %}
+                        <img src="{{ request.photo.url }}" alt="{{ request.title }}" class="img-thumbnail" style="max-width: 100px;">
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Нет выполненных заявок для отображения.</p>
+    {% endif %}
+
+    <hr>
+
+    <!-- Section for current user's applications -->
+    <h2 class="mt-4">Мои заявки</h2>
+
+    {% for application in applications %}
+        <div class="application-item mb-3 p-3 border rounded bg-light">
+            <h5>{{ application.title }}</h5>
+            <!-- Other application details -->
+            <p><strong>Категория:</strong> {{ application.category }}</p>
+            <p><strong>Статус:</strong> {{ application.get_status_display }}</p>
+
+            {% if application.user == request.user and application.status not in non_deletable_statuses %}
+                <a href="{% url 'delete_application' application.id %}" class="btn btn-danger">Удалить</a>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    <hr>
+
+    <h2 class="mt-4">Количество заявок в статусе «Принято в работу»</h2>
+    <p class="lead">{{ accepted_requests_count }}</p>
+</div>
+
+{% endblock %}
+
 </body>
 </html>

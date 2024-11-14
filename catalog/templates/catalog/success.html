@@ -1,7 +1,14 @@
-{% extends "index.html" %}
-
+{% extends "basic.html" %}
+{% load bootstrap4 %}
+{% load static %}
 {% block content %}
-    <h1>Заявка успешно создана!</h1>
-    <p>Спасибо за вашу заявку. Мы свяжемся с вами в ближайшее время.</p>
-    <a href="{% url 'index' %}">Создать новую заявку</a>
+    <div class="container mt-5">
+        <div class="alert alert-success" role="alert">
+            <h1>Заявка успешно создана!</h1>
+            <p>Спасибо за вашу заявку. Мы свяжемся с вами в ближайшее время.</p>
+        </div>
+        <div class="mt-3">
+            <a href="{% url 'index' %}" class="btn btn-primary">Создать новую заявку</a>
+        </div>
+    </div>
 {% endblock %}

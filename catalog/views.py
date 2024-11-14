@@ -3,32 +3,62 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.views import View
 from django.contrib.auth.views import LoginView
-from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from .models import Application
 from .forms import UserRegisterForm, CustomLoginForm, ApplicationForm, CaptchaForm
+from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy
+from django.views.generic import DeleteView
+from django.core.exceptions import PermissionDenied
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+from django.views import generic
+from django.views.generic import DeleteView
 
 
 class SuccessView(TemplateView):
-    template_name = "success.html"
+    template_name = "catalog/success.html"
 
 class SuccessCaptchaView(TemplateView):
     template_name = "success_captcha.html"
+
 
 class IndexView(View):
     def get(self, request):
         # Получаем только заявки со статусом 'done'
         applications = Application.objects.filter(status='done')
+        completed_requests = Application.objects.filter(status='completed')
+        accepted_requests_count = Application.objects.filter(status='in_progress').count()
         form = ApplicationForm()  # Создаем экземпляр формы
-        return render(request, 'index.html', {'applications': applications, 'form': form})
+
+        return render(request, 'index.html', {
+            'applications': applications,
+            'completed_requests': completed_requests,
+            'accepted_requests_count': accepted_requests_count,
+            'form': form,
+            'non_deletable_statuses': ['in_progress', 'completed']  # Pass statuses as context
+        })
 
     def post(self, request):
         form = ApplicationForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()  # Сохранение заявки в базу данных
+            application = form.save(commit=False)
+            application.user = request.user  # Assign current user to the application
+            application.save()
             return redirect('success_captcha')  # Перенаправление на страницу успеха
-        applications = Application.objects.filter(status='done')  # Получаем заявки снова для отображения
-        return render(request, 'index.html', {'applications': applications, 'form': form})
+
+        # If the form is invalid, re-fetch applications for display
+        applications = Application.objects.filter(status='done')  # Only show 'done' applications again
+        completed_requests = Application.objects.filter(status='completed')
+        accepted_requests_count = Application.objects.filter(status='in_progress').count()
+
+        return render(request, 'index.html', {
+            'applications': applications,
+            'completed_requests': completed_requests,
+            'accepted_requests_count': accepted_requests_count,
+            'form': form,
+            'non_deletable_statuses': ['in_progress', 'completed']  # Pass statuses as context
+        })
 
 class RegisterView(View):
     def get(self, request):
@@ -68,14 +98,52 @@ class CustomLogoutView(View):
 
 class CreateApplicationView(View):
     def get(self, request):
+        if not request.user.is_authenticated:
+            return redirect('login')  # Redirect to login if not authenticated
         form = ApplicationForm()
-        return render(request, 'create_application.html', {'form': form})
+        return render(request, "catalog/create_application.html", {'form': form})  # Make sure the path matches
 
     def post(self, request):
         form = ApplicationForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()  # Сохранение заявки в базу данных
-            return redirect('success')  # Перенаправление на страницу успеха
-        return render(request, 'create_application.html', {'form': form})
+            application = form.save(commit=False)
+            application.user = request.user  # Assign current user to the application
+            application.save()
+            return redirect('success')  # Redirect to success page
+        form = ApplicationForm()
+        return render(request, "catalog/create_application.html", {'form': form})  # Ensure path matches here too
 
+class ApplicationDeleteView(DeleteView):
+    model = Application
+    template_name = 'catalog/delete_confirmation.html'
+    context_object_name = 'application'
+    success_url = reverse_lazy('index')  # Redirect to the index page after deletion
 
+    def get_object(self, queryset=None):
+        """Override to ensure the user can only delete their own applications."""
+        obj = super().get_object(queryset)
+        if self.request.user != obj.user:
+            messages.error(self.request, "Вы не можете удалить эту заявку.")
+            raise PermissionDenied  # Raise an error if the user is not the owner
+        if obj.status in ['in_progress', 'completed']:
+            messages.error(self.request, "Эту заявку нельзя удалить.")
+            raise PermissionDenied  # Raise an error if the status does not allow deletion
+        return obj
+
+    def post(self, request, *args, **kwargs):
+        """Override post method to show success message after deletion."""
+        messages.success(request, "Заявка успешно удалена.")
+        return super().post(request, *args, **kwargs)
+
+class AccountListView(LoginRequiredMixin, generic.ListView):
+    model = Application
+    template_name = 'catalog/personal_account.html'
+
+    def get_queryset(self):
+        return Application.objects.filter(creator=self.request.user).order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['designapplication_list'] = self.get_queryset()
+        print("Current user:", self.request.user)  # Debugging output
+        return context

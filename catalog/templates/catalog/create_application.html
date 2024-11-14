@@ -1,26 +1,24 @@
 {% extends "basic.html" %}
-
+{% load bootstrap4 %}
+{% load static %}
 {% block content %}
-    <h1>Создать заявку</h1>
-    <form method="post" enctype="multipart/form-data">
+<div class="container mt-5">
+    <h2>Создать новую заявку</h2>
+    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
         {% csrf_token %}
-        {{ form.as_p }}  <!-- Отображение формы -->
-        <button type="submit">Отправить</button>
+        {% bootstrap_form form %}
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Отправить заявку</button>
+        </div>
     </form>
-
     {% if form.errors %}
-        <div class="error">
-            <p>Исправьте ошибки в форме:</p>
+        <div class="alert alert-danger">
             <ul>
-                {% for field in form %}
-                    {% for error in field.errors %}
-                        <li>{{ field.label }}: {{ error }}</li>
-                    {% endfor %}
-                {% endfor %}
-                {% for error in form.non_field_errors %}
-                    <li>{{ error }}</li>
+                {% for field, errors in form.errors.items %}
+                    <li><strong>{{ field.label }}:</strong> {{ errors }}</li>
                 {% endfor %}
             </ul>
         </div>
     {% endif %}
+</div>
 {% endblock %}
