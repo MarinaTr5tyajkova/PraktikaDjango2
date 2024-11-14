@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import Category, DesignRequest
+from .models import Category, Application
 
 # Register your models here.
 admin.site.register(Category)
-admin.site.register(DesignRequest)
+admin.site.register(Application)

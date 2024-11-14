@@ -5,37 +5,29 @@ from django.views import View
 from django.contrib.auth.views import LoginView
 from .forms import UserRegisterForm
 from .forms import CustomLoginForm
-from .models import DesignRequest
-from .forms import DesignRequestForm
-from django.views.generic import CreateView, ListView
-from django.urls import reverse_lazy
+from django.shortcuts import render, redirect
+from .forms import ApplicationForm
+from django.views.generic import TemplateView
+from .models import Application
 
-def index(request):
-    return render(request, 'index.html')
 
-"""
+class SuccessView(TemplateView):
+    template_name = "success.html"
+
 class IndexView(View):
-    template_name = 'index.html'
-
-    def get(self, request, *args, **kwargs):
-        # Получаем завершенные запросы
-        completed_requests = DesignRequest.objects.filter(status='completed').order_by('-timestamp')[:4]
-        # Получаем количество запросов в процессе выполнения
-        in_progress_count = DesignRequest.objects.filter(status='in_progress').count()
-
-        # Формируем контекст для шаблона
-        context = {
-            'completed_requests': completed_requests,
-            'in_progress_count': in_progress_count,
-        }
-
-        # Возвращаем рендеринг шаблона с контекстом
-        return render(request, self.template_name, context)
-"""
-
-class CatalogView(View):
     def get(self, request):
-        return render(request, 'catalog/catalog.html')  # Отображение страницы каталога
+        # Получаем только заявки со статусом 'done'
+        applications = Application.objects.filter(status='done')
+        form = ApplicationForm()  # Создаем экземпляр формы
+        return render(request, 'index.html', {'applications': applications, 'form': form})
+
+    def post(self, request):
+        form = ApplicationForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()  # Сохранение заявки в базу данных
+            return redirect('success')  # Перенаправление на страницу успеха
+        applications = Application.objects.filter(status='done')  # Получаем заявки снова для отображения
+        return render(request, 'index.html', {'applications': applications, 'form': form})
 
 class RegisterView(View):
     def get(self, request):
@@ -67,26 +59,17 @@ class CustomLogoutView(View):
     def get(self, request):
         return render(request, 'registration/logout_success.html')  # Или можно перенаправить на главную страницу
 
-class CreateDesignRequestView(CreateView):
-    model = DesignRequest
-    form_class = DesignRequestForm
-    template_name = 'create_design_request.html'
-    success_url = reverse_lazy('view_requests')
+class CreateApplicationView(View):
+    def get(self, request):
+        form = ApplicationForm()
+        return render(request, 'create_application.html', {'form': form})
 
-    def form_valid(self, form):
-        design_request = form.save(commit=False)
-        design_request.user = self.request.user  # Associate the request with the logged-in user
-        design_request.save()
-        return super().form_valid(form)
+    def post(self, request):
+        form = ApplicationForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()  # Сохранение заявки в базу данных
+            return redirect('success')  # Перенаправление на страницу успеха
+        return render(request, 'create_application.html', {'form': form})
 
-class ViewRequestsView(ListView):
-    model = DesignRequest
-    template_name = 'view_requests.html'
-    context_object_name = 'requests'
-
-    paginate_by = 4
-
-    def get_queryset(self):
-        return DesignRequest.objects.filter(user=self.request.user)  # Get requests for the logged-in user
 
 

@@ -3,8 +3,76 @@
 {% load static %}
 
 {% block content %}
-    <div class="container mt-5">
-        <h1>Добро пожаловать на главную страницу!</h1>
-        <!-- Остальной контент вашей главной страницы -->
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <div class="alert alert-primary" role="alert">
+                    <h5 class="alert-heading">Добро пожаловать в нашу дизайн-студию!</h5>
+                    <p>Мы рады приветствовать вас на платформе, где ваши идеи становятся реальностью! Наша студия предлагает уникальную возможность для всех зарегистрированных пользователей: загружайте планы своих помещений и получайте профессиональные рекомендации по их оформлению.</p>
+                </div>
+            </div>
+        </div>
     </div>
-{% endblock content %}
+
+    {% if applications %}
+        <div class="container">
+            <div class="row">
+                {% for application in applications %}
+                    <div class="col-md-4 mb-4">  <!-- Блок для каждой заявки -->
+                        <div class="card"> <!-- Убираем фиксированную высоту блока -->
+                            {% if application.photo %}
+                                <img src="{{ application.photo.url }}" alt="{{ application.title }}" class="card-img-top" style="max-height: 200px; object-fit: cover;">
+                            {% endif %}
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">
+                                    <a href="{{ application.get_absolute_url }}">{{ application.title }}</a>
+                                </h5>
+                                <p class="card-text">
+                                    <strong>Дата:</strong> {{ application.created_at|date:"d.m.Y H:i" }}<br>
+                                    <strong>Категория:</strong> {{ application.category }}<br>
+                                </p>
+                                <details style="margin-top: auto;">
+                                    <summary style="cursor: pointer; color: #007bff; padding: 0; margin: 0;">
+                                        Показать описание
+                                    </summary>
+                                    <p style="margin-top: 10px; margin-bottom: 0;">{{ application.description }}</p>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <p>Нет заявок со статусом "Готово".</p>
+    {% endif %}
+{% endblock %}
+
+<style>
+    details {
+        cursor: pointer;
+        /* Убираем стандартные стрелочки браузера */
+        list-style-type: none;
+    }
+
+    summary {
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Убираем стандартные стрелочки браузера */
+    details summary::-webkit-details-marker {
+        display: none; /* Для WebKit браузеров (Chrome, Safari) */
+    }
+
+    details summary::-moz-details-marker {
+        display: none; /* Для Firefox */
+    }
+
+    /* Стили для текста описания */
+    details p {
+        margin-top: 10px;
+        margin-bottom: 0;
+        overflow-wrap: break-word; /* Перенос длинных слов */
+    }
+</style>

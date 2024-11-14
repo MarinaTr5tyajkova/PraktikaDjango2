@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 import re
 from django.contrib.auth.forms import AuthenticationForm
-from .models import DesignRequest
+from .models import Application
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField(
@@ -118,16 +118,13 @@ class LoginForm(forms.Form):
     )
 
 
-class DesignRequestForm(forms.ModelForm):
+class ApplicationForm(forms.ModelForm):
     class Meta:
-        model = DesignRequest
-        fields = ['title', 'description', 'category', 'image']
+        model = Application
+        fields = ['title', 'description', 'category', 'photo']
 
-    def clean_image(self):
-        image = self.cleaned_data.get('image')
-        if image:
-            # Check file size (max 2MB)
-            if image.size > 2 * 1024 * 1024:
-                raise forms.ValidationError("The maximum file size is 2MB.")
-            return image
-        raise forms.ValidationError("This field is required.")
+    def clean_photo(self):
+        photo = self.cleaned_data.get('photo')
+        if photo.size > 2 * 1024 * 1024:  # Проверка на максимальный размер 2 Мб
+            raise forms.ValidationError("Размер файла не должен превышать 2 Мб.")
+        return photo
