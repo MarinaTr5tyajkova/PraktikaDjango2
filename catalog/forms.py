@@ -2,10 +2,9 @@ from django import forms
 from .models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 import re
 from .models import Application
-
-
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField(
@@ -86,8 +85,6 @@ class UserRegisterForm(UserCreationForm):
         if password1 and password2 and password1 != password2:
             raise ValidationError("Пароли не совпадают.")
 
-
-
 class LoginForm(forms.Form):
     username = forms.CharField(required=True, max_length=200, label='', widget=forms.TextInput(attrs={'placeholder': 'Имя пользователя'}))
     password = forms.CharField(required=True, max_length=200, label='', widget=forms.PasswordInput(attrs={'placeholder': 'Пароль'}))
@@ -127,3 +124,35 @@ class CaptchaForm(forms.Form):
             raise ValidationError("Неправильный ответ на капчу. Попробуйте снова.")
         return answer
 
+class EditAppForm(forms.ModelForm):
+    design_comment = forms.CharField(required=False, max_length=200, label='', widget=forms.Textarea(attrs={'placeholder': 'Комментарий'}))
+    design_photo = forms.FileField(required=False, label='Изображение дизайна', validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'bmp'])])
+
+    class Meta:
+        model = Application
+        fields = ['category', 'status', 'design_comment', 'design_photo']
+        widgets = { 'category': forms.CheckboxSelectMultiple(), }
+
+    def clean_design_comment(self):
+        new_status = self.cleaned_data.get('status')
+        design_comment = self.cleaned_data.get('design_comment')
+        if new_status == 'work' and not design_comment:
+            raise ValidationError('Комментарий должен быть заполнен.')
+        return design_comment
+
+    def clean_design_photo(self):
+        new_status = self.cleaned_data.get('status')
+        design_photo = self.cleaned_data.get('design_photo')
+        if new_status == 'done' and not design_photo:
+            raise ValidationError('Изображение должно быть заполнено.')
+        return design_photo
+
+class AppFilterForm(forms.Form):
+    STATUS_CHOICES = [
+        ('', 'Все'),
+        ('new', 'Новая'),
+        ('work', 'Принято в работу'),
+        ('done', 'Выполнено'),
+    ]
+
+    status = forms.ChoiceField(choices=STATUS_CHOICES, required=False, label='Статус')

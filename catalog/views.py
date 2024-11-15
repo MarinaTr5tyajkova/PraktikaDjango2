@@ -4,16 +4,19 @@ from django.contrib.auth import authenticate, login, logout
 from django.views import View
 from django.contrib.auth.views import LoginView
 from django.views.generic import TemplateView
-from .models import Application
+from .models import Application, Category, User
 from .forms import UserRegisterForm, LoginForm, ApplicationForm, CaptchaForm
 from django.core.exceptions import PermissionDenied
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views import generic
-from django.views.generic import DeleteView
-from django.contrib.auth import login
-from django.shortcuts import redirect
+from django.views.generic import DeleteView, UpdateView, CreateView
 
+from unicodedata import category
+from django.contrib.auth.decorators import permission_required, login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+
+from django import forms
+from .forms import EditAppForm, AppFilterForm
 
 
 
@@ -29,16 +32,14 @@ class IndexView(View):
     def get(self, request):
         # Получаем только заявки со статусом 'done'
         applications = Application.objects.filter(status='done')
-        completed_requests = Application.objects.filter(status='completed')
-        accepted_requests_count = Application.objects.filter(status='in_progress').count()
+        accepted_requests_count = Application.objects.filter(status='work').count()
         form = ApplicationForm()  # Создаем экземпляр формы
 
         return render(request, 'index.html', {
             'applications': applications,
-            'completed_requests': completed_requests,
             'accepted_requests_count': accepted_requests_count,
             'form': form,
-            'non_deletable_statuses': ['in_progress', 'completed']  # Передавать статусы в качестве контекста
+            'non_deletable_statuses': ['work', 'done']  # Передавать статусы в качестве контекста
         })
 
     def post(self, request):
@@ -162,7 +163,7 @@ class ApplicationDeleteView(DeleteView):
         if self.request.user != obj.creator:
             messages.error(self.request, "Вы не можете удалить эту заявку.")
             raise PermissionDenied  # Raise an error if the user is not the owner
-        if obj.status in ['in_progress', 'completed']:
+        if obj.status in ['work', 'done']:
             messages.error(self.request, "Эту заявку нельзя удалить.")
             raise PermissionDenied  # Raise an error if the status does not allow deletion
         return obj
@@ -197,4 +198,122 @@ class AppDelete(DeleteView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['object'] = self.get_object()  # Ensure the object is available in the context
+        return context
+
+class CategoryDelete(DeleteView, PermissionRequiredMixin):
+    permission_required = 'catalog.can_edit_status'
+    model = Category
+    success_url = reverse_lazy('all_categories')
+    template_name = 'delete_category.html'
+
+    def get_queryset(self):
+        return super().get_queryset()
+
+@login_required
+def create_application(request):
+    if request.method == 'POST':
+        form = ApplicationForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            form.save()  # Saves the instance with correct category
+            return redirect('account')
+        else:
+            print(form.errors)  # Print out the errors for debugging
+    else:
+        form = ApplicationForm()
+    return render(request, 'catalog/create_application.html', {'form': form})
+
+class HomepageListView(generic.ListView):
+    model = Application
+    template_name = 'index.html'
+
+    def get_queryset(self):
+        return Application.objects.all().filter(status='done').order_by('-created_at')[:4]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['apps_in_process'] = Application.objects.filter(status='work').count()
+        return context
+
+class AllAppsListView(generic.ListView, PermissionRequiredMixin):
+    permission_required = 'catalog.can_edit_status'
+    model = Application
+    template_name = 'catalog/all_apps.html'
+
+    def get_queryset(self):
+        return Application.objects.all().order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['designapplication_list'] = self.get_queryset()
+        print("Current user:", self.request.user)  # Debugging output
+        return context
+
+class AllCategoriesListView(generic.ListView, PermissionRequiredMixin):
+    permission_required = 'catalog.can_edit_status'
+    model = Category
+    template_name = 'catalog/all_categories.html'
+
+    def get_queryset(self):
+        return Category.objects.all().order_by('id')
+
+class EditApp(UpdateView, PermissionRequiredMixin):
+    permission_required = 'catalog.can_edit_status'
+    model = Application
+    template_name = 'catalog/edit_app.html'
+    form_class = EditAppForm
+
+    success_url = reverse_lazy('all_apps')
+
+class EditCategory(UpdateView, PermissionRequiredMixin):
+    permission_required = 'catalog.can_edit_status'
+    model = Category
+    template_name = 'catalog/edit_category.html'
+    fields = ['name']
+
+    success_url = reverse_lazy('all_categories')
+
+class CreateCategory(CreateView, PermissionRequiredMixin):
+    permission_required = 'catalog.can_edit_status'
+    model = Category
+    template_name = 'catalog/create_category.html'
+    fields = ['name']
+
+    success_url = reverse_lazy('all_categories')
+
+class AllUsersListView(generic.ListView, PermissionRequiredMixin):
+    permission_required = 'catalog.can_edit_status'
+    model = Category
+    template_name = 'catalog/all_users.html'
+    context_object_name = 'users'
+
+    def get_queryset(self):
+        return User.objects.all().order_by('id')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user_list'] = self.get_queryset()
+        print("Current user:", self.request.user)  # Debugging output
+        return context
+
+class UserDeleteView(DeleteView):
+    model = User
+    template_name = 'catalog/delete_user.html'  # Убедитесь, что путь к шаблону правильный
+    success_url = reverse_lazy('all_users')
+
+    def get_queryset(self):
+        return User.objects.all()  # Возвращаем всех пользователей
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.get_object()  # Получаем объект пользователя
+        context['user'] = user  # Передаем пользователя в контекст
+
+        # Определяем статус пользователя
+        if user.is_superuser:
+            context['status'] = 'Администратор'
+        elif user.is_staff:
+            context['status'] = 'Сотрудник'
+        else:
+            context['status'] = 'Обычный пользователь'
+
         return context

@@ -1,0 +1,12 @@
+{% extends "basic.html" %}
+
+{% block content %}
+
+<h3>Создание категории</h3>
+<form method="post" novalidate enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary font-weight-bold">Создать</button>
+</form>
+
+{% endblock %}

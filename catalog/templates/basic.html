@@ -28,6 +28,12 @@
                             <button type="submit" class="dropdown-item">Выйти</button>
                         </form>
                         <a class="dropdown-item" href="{% url 'personal_account' %}">Личный кабинет</a>
+                        {% if perms.catalog.can_edit_status %}
+                            <li class="mt-4">Админ</li>
+                            <li><a href="{% url 'all_apps' %}">Заявки</a></li>
+                            <li><a href="{% url 'all_categories' %}">Категории</a></li>
+                            <li><a href="{% url 'all_users' %}">Пользователи</a></li>
+                        {% endif %}
                     </div>
                 </div>
             {% else %}

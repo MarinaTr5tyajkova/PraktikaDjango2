@@ -1,0 +1,56 @@
+{% extends "basic.html" %}
+
+{% block content %}
+
+    <h3>Редактирование заявки</h3>
+    <div class="app-display-card app-display-card-edit">
+        <div>
+            <p class="mb-2 h5 text-center">{{ object.title }}</p>
+            <p class="text-secondary mt-1 mb-1">{{ object.time_created_f }}</p>
+            <p class="text-white mb-1 app-display-category text-truncate">{{ object.get_categories }}</p>
+        </div>
+        <div>
+            {% if object.photo %}
+                <img src="{{ object.photo.url }}" alt="{{ object.title }}" class="app-display-img"/>
+            {% endif %}
+            <p>{{ object.get_status_display }}</p>
+        </div>
+    </div>
+    <form method="post" novalidate enctype="multipart/form-data" class="mt-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary font-weight-bold mb-5">Сохранить</button>
+    </form>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const optionField = document.getElementById('id_status');
+            const commentField = document.querySelector('p:has(#id_design_comment)');
+            const photoField = document.querySelector('p:has(#id_design_photo)');
+            const discountField = document.querySelector('p:has(#id_discount)');
+
+            function toggleAdditionalFields() {
+                if (optionField.value === "work") {
+                    commentField.style.display = "block";
+                    photoField.style.display = "none";
+                    discountField.style.display = "none";
+                }
+                else if (optionField.value === "done") {
+                    photoField.style.display = "block";
+                    commentField.style.display = "none";
+                    discountField.style.display = "block";
+                }
+                else {
+                    discountField.style.display = "none";
+                    commentField.style.display = "none";
+                    photoField.style.display = "none";
+                }
+
+                console.log(optionField.value)
+            }
+
+            toggleAdditionalFields();
+            optionField.addEventListener("change", toggleAdditionalFields);
+        });
+    </script>
+{% endblock %}

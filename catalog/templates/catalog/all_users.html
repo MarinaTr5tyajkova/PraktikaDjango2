@@ -1,0 +1,15 @@
+{% extends "basic.html" %}
+
+{% block content %}
+
+<h3>Пользователи</h3>
+    {% if user_list %}
+        <hr>
+        {% for user in user_list %}
+            <a>{{ user }}</a>
+            <a href="{% url 'delete_user' user.id %}" class="btn btn-danger font-weight-bold">Удалить</a>
+        {% endfor %}
+    {% else %}
+      <p>В базе данных нет пользователей</p>
+    {% endif %}
+{% endblock %}

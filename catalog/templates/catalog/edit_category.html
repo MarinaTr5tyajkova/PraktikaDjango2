@@ -1,0 +1,12 @@
+{% extends "basic.html" %}
+
+{% block content %}
+
+    <h3>Редактирование категории</h3>
+    <form method="post" novalidate enctype="multipart/form-data" class="mt-1">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary font-weight-bold">Сохранить</button>
+        <a href="{% url 'delete_category' object.id %}" class="btn btn-danger font-weight-bold">Удалить</a>
+    </form>
+{% endblock %}
