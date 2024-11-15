@@ -6,8 +6,7 @@
     {% if user_list %}
         <hr>
         {% for user in user_list %}
-            <a>{{ user }}</a>
-            <a href="{% url 'delete_user' user.id %}" class="btn btn-danger font-weight-bold">Удалить</a>
+            <a href="{% url 'edit_user' user.id %}" class="h5 d-block mb-3">{{ user }}</a>
         {% endfor %}
     {% else %}
       <p>В базе данных нет пользователей</p>

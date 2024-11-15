@@ -93,7 +93,6 @@ class ApplicationForm(forms.ModelForm):
     class Meta:
         model = Application
         fields = ['title', 'description', 'category', 'photo']
-        # widgets = {'category':  forms.CheckboxSelectMultiple()}
 
     def clean_photo(self):
         photo = self.cleaned_data.get('photo')
@@ -131,7 +130,6 @@ class EditAppForm(forms.ModelForm):
     class Meta:
         model = Application
         fields = ['category', 'status', 'design_comment', 'design_photo']
-        widgets = { 'category': forms.CheckboxSelectMultiple(), }
 
     def clean_design_comment(self):
         new_status = self.cleaned_data.get('status')
@@ -156,3 +154,8 @@ class AppFilterForm(forms.Form):
     ]
 
     status = forms.ChoiceField(choices=STATUS_CHOICES, required=False, label='Статус')
+
+class UserEditForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['is_staff', 'is_superuser', 'is_approved']

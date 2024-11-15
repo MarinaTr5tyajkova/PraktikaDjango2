@@ -33,6 +33,9 @@
                                 {% endif %}
                             </div>
                         </div>
+                        {% if application.status == 'new' %}
+                        <a href="{% url 'edit_app' application.id %}" class="btn btn-primary font-weight-bold">Редактировать</a>
+                        {% endif %}
                     </div>
                 {% endfor %}
             </div>

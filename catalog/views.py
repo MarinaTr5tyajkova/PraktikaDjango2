@@ -5,7 +5,7 @@ from django.views import View
 from django.contrib.auth.views import LoginView
 from django.views.generic import TemplateView
 from .models import Application, Category, User
-from .forms import UserRegisterForm, LoginForm, ApplicationForm, CaptchaForm
+from .forms import UserRegisterForm, LoginForm, ApplicationForm, CaptchaForm, UserEditForm
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse_lazy
 from django.views import generic
@@ -200,14 +200,20 @@ class AppDelete(DeleteView):
         context['object'] = self.get_object()  # Ensure the object is available in the context
         return context
 
-class CategoryDelete(DeleteView, PermissionRequiredMixin):
+class CategoryDelete(DeleteView):
     permission_required = 'catalog.can_edit_status'
     model = Category
     success_url = reverse_lazy('all_categories')
     template_name = 'delete_category.html'
 
     def get_queryset(self):
-        return super().get_queryset()
+        return Category.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        category = self.get_object()  # Получаем объект пользователя
+        context['category'] = category  # Передаем пользователя в контекст
+        return context
 
 @login_required
 def create_application(request):
@@ -296,6 +302,7 @@ class AllUsersListView(generic.ListView, PermissionRequiredMixin):
         return context
 
 class UserDeleteView(DeleteView):
+    permission_required = 'catalog.can_edit_status'
     model = User
     template_name = 'catalog/delete_user.html'  # Убедитесь, что путь к шаблону правильный
     success_url = reverse_lazy('all_users')
@@ -316,4 +323,16 @@ class UserDeleteView(DeleteView):
         else:
             context['status'] = 'Обычный пользователь'
 
+        return context
+
+class UserEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = User
+    form_class = UserEditForm
+    template_name = 'catalog/edit_user.html'  # Убедитесь, что путь к шаблону правильный
+    success_url = reverse_lazy('all_users')  # Перенаправление после успешного редактирования
+    permission_required = 'catalog.can_edit_status'  # Убедитесь, что у вас есть соответствующее разрешение
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user'] = self.get_object()  # Передаем пользователя в контекст
         return context
