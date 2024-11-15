@@ -1,11 +1,10 @@
-{% load bootstrap4 %}
-{% load static %}
-
 <!doctype html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    {% load bootstrap4 %}
+    {% load static %}
     {% bootstrap_css %}
     {% bootstrap_javascript jquery='slim' %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
@@ -23,6 +22,7 @@
                     <div class="dropdown-menu">
                         <a class="dropdown-item" href="{% url 'create_application' %}">Создать заявку</a>
                         <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{% url 'index' %}">Главная</a>
                         <form method="post" action="{% url 'logout' %}">
                             {% csrf_token %}
                             <button type="submit" class="dropdown-item">Выйти</button>
@@ -40,55 +40,6 @@
 
 {% bootstrap_messages %}
 {% block content %}
-
-<div class="container mt-4">
-    {% if user.is_authenticated %}
-        <a href="{% url 'create_application' %}" class="btn btn-success mb-3">Добавить заявку</a>
-    {% endif %}
-
-    <h2 class="mb-4">Последние выполненные заявки</h2>
-
-    {% if completed_requests %}
-        <div class="list-group">
-            {% for request in completed_requests %}
-                <div class="list-group-item">
-                    <h5 class="mb-1">{{ request.title }}</h5>
-                    <p class="mb-1"><strong>Категория:</strong> {{ request.category }}</p>
-                    <p class="mb-1"><strong>Дата выполнения:</strong> {{ request.timestamp|date:"d.m.Y H:i" }}</p>
-                    {% if request.photo %}
-                        <img src="{{ request.photo.url }}" alt="{{ request.title }}" class="img-thumbnail" style="max-width: 100px;">
-                    {% endif %}
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p>Нет выполненных заявок для отображения.</p>
-    {% endif %}
-
-    <hr>
-
-    <!-- Section for current user's applications -->
-    <h2 class="mt-4">Мои заявки</h2>
-
-    {% for application in applications %}
-        <div class="application-item mb-3 p-3 border rounded bg-light">
-            <h5>{{ application.title }}</h5>
-            <!-- Other application details -->
-            <p><strong>Категория:</strong> {{ application.category }}</p>
-            <p><strong>Статус:</strong> {{ application.get_status_display }}</p>
-
-            {% if application.user == request.user and application.status not in non_deletable_statuses %}
-                <a href="{% url 'delete_application' application.id %}" class="btn btn-danger">Удалить</a>
-            {% endif %}
-        </div>
-    {% endfor %}
-
-    <hr>
-
-    <h2 class="mt-4">Количество заявок в статусе «Принято в работу»</h2>
-    <p class="lead">{{ accepted_requests_count }}</p>
-</div>
-
 {% endblock %}
 
 </body>

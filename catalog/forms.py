@@ -1,10 +1,11 @@
 from django import forms
-from django.contrib.auth.models import User
+from .models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 import re
-from django.contrib.auth.forms import AuthenticationForm
 from .models import Application
+
+
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField(
@@ -85,49 +86,37 @@ class UserRegisterForm(UserCreationForm):
         if password1 and password2 and password1 != password2:
             raise ValidationError("Пароли не совпадают.")
 
-class CustomLoginForm(AuthenticationForm):
-    username = forms.CharField(
-        label='Логин',
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',  # Класс Bootstrap для стилизации
-            'placeholder': 'Введите логин или email'  # Подсказка для пользователя
-        })
-    )
-    password = forms.CharField(
-        label='Пароль',
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control',  # Класс Bootstrap для стилизации
-            'placeholder': 'Введите пароль'  # Подсказка для пользователя
-        })
-    )
+
 
 class LoginForm(forms.Form):
-    username = forms.CharField(
-        label='Логин',
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',  # Класс Bootstrap для стилизации
-            'placeholder': 'Введите логин или email'  # Подсказка для пользователя
-        })
-    )
-    password = forms.CharField(
-        label='Пароль',
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control',  # Класс Bootstrap для стилизации
-            'placeholder': 'Введите пароль'  # Подсказка для пользователя
-        })
-    )
-
+    username = forms.CharField(required=True, max_length=200, label='', widget=forms.TextInput(attrs={'placeholder': 'Имя пользователя'}))
+    password = forms.CharField(required=True, max_length=200, label='', widget=forms.PasswordInput(attrs={'placeholder': 'Пароль'}))
 
 class ApplicationForm(forms.ModelForm):
     class Meta:
         model = Application
         fields = ['title', 'description', 'category', 'photo']
+        # widgets = {'category':  forms.CheckboxSelectMultiple()}
 
     def clean_photo(self):
         photo = self.cleaned_data.get('photo')
         if photo.size > 2 * 1024 * 1024:  # Проверка на максимальный размер 2 Мб
             raise forms.ValidationError("Размер файла не должен превышать 2 Мб.")
         return photo
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        application = super().save(commit=False)
+        if self.user:
+            application.creator = self.user
+
+        if commit:
+            application.save()
+            self.save_m2m()
+        return application
 
 class CaptchaForm(forms.Form):
     captcha_answer = forms.IntegerField(label='2 + 2 * 2 = ')
@@ -137,3 +126,4 @@ class CaptchaForm(forms.Form):
         if answer != 6:  # Проверка правильного ответа
             raise ValidationError("Неправильный ответ на капчу. Попробуйте снова.")
         return answer
+

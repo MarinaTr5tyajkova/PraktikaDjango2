@@ -3,30 +3,41 @@
 {% block content %}
 
 <h3>Личный кабинет</h3>
-{% if designapplication_list %}
-    <p class="h5 mt-4">Ваши заявки</p>
-    <hr>
-    <div class="app-display p-2">
-        {% for app in designapplication_list %}
-            <div class="app-display-card">
-                <h5 class="mb-1">{{ app.title }}</h5>
-                <p class="mb-1"><strong>Категория:</strong> {{ app.category }}</p>
-                <p class="mb-1"><strong>Дата выполнения:</strong> {{ app.created_at|date:"d.m.Y H:i" }}</p>
-                {% if app.photo %}
-                    <img src="{{ app.photo.url }}" alt="{{ app.title }}" class="img-thumbnail" style="max-width: 100px;">
-                {% endif %}
-                {% if app.status == 'new' %}
-                    <a href="{% url 'app_delete' app.id %}" class="button delete-button pt-2 pb-2">Удалить</a>
-                {% else %}
-                    <p class="button delete-button-inactive pt-2 pb-2 mb-0">В работе</p>
-                {% endif %}
+    {% if designapplication_list %}
+        <div class="container">
+            <div class="row">
+                {% for application in designapplication_list %}
+                    <div class="col-md-4 mb-4">  <!-- Блок для каждой заявки -->
+                        <div class="card"> <!-- Убираем фиксированную высоту блока -->
+                            {% if application.photo %}
+                                <img src="{{ application.photo.url }}" alt="{{ application.title }}" class="card-img-top" style="max-height: 200px; object-fit: cover;">
+                            {% endif %}
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">
+                                    <a href="{{ application.get_absolute_url }}">{{ application.title }}</a>
+                                </h5>
+                                <p class="card-text">
+                                    <strong>Дата:</strong> {{ application.created_at|date:"d.m.Y H:i" }}<br>
+                                    <strong>Категория:</strong> {{ application.category }}<br>
+                                </p>
+                                <details style="margin-top: auto;">
+                                    <summary style="cursor: pointer; color: #007bff; padding: 0; margin: 0;">
+                                        Показать описание
+                                    </summary>
+                                    <p style="margin-top: 10px; margin-bottom: 0;">{{ application.description }}</p>
+                                </details>
+                                {% if application.status == 'new' %}
+                                    <a href="{% url 'delete_application' application.id %}" class="button delete-button pt-2 pb-2">Удалить</a>
+                                {% else %}
+                                    <p class="button delete-button-inactive pt-2 pb-2 mb-0">В работе</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
-        {% endfor %}
-    </div>
-{% else %}
-    <p>У вас нет заявок.</p>
-{% endif %}
-
-<p>Debug: {{ designapplication_list|length }} заявок найдено.</p>  <!-- Debugging output -->
-
+        </div>
+    {% else %}
+        <p>У вас нет заявок</p>
+    {% endif %}
 {% endblock %}

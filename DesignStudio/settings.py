@@ -114,16 +114,18 @@ USE_I18N = True
 
 USE_TZ = True
 
+STATIC_URL = '/static/'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = '/static/'
-
 #Cписок директорий, где Django будет искать статические файлы.
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # Ensure this directory exists
-]
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'catalog', 'static'),  # Ensure this directory exists
+# ]
+
+
+
 #Переменная указывает, куда будут собираться все статические файлы при выполнении команды collectstatic
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
@@ -137,3 +139,4 @@ LOGOUT_REDIRECT_URL = '/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+AUTH_USER_MODEL = 'catalog.User'
